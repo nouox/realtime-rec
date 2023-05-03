@@ -1,6 +1,7 @@
 package com.fdx.rec.processing.history
 
-import org.apache.spark.sql.SparkSession
+import com.fdx.rec.processing.io.LoadData
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object GenOfflineRecModel {
   def main(args: Array[String]): Unit = {
@@ -12,10 +13,14 @@ object GenOfflineRecModel {
       .config("spark.driver.host", "localhost")
       .getOrCreate()
 
+    // 加载历史数据 -> (log, product)
+    val oriData: (DataFrame, DataFrame) = LoadData.load(spark)
+
     // 基于协同过滤的推荐算法
-    CollaborativeFilter.process(spark)
+    CollaborativeFilter.process(spark, oriData._1)
 
     // 基于内容的推荐算法
+    ContentBased.process(spark, oriData._1, oriData._2)
 
     // 深度学习模型
 

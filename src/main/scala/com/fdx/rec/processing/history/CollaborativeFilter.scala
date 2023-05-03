@@ -1,6 +1,5 @@
 package com.fdx.rec.processing.history
 
-import com.fdx.rec.utils.MyConstants
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.recommendation.{ALS, ALSModel}
 import org.apache.spark.sql.functions._
@@ -12,22 +11,14 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * 最后使用协同过滤算法来推荐相似的商品
  */
 object CollaborativeFilter {
-  def process(spark: SparkSession): Unit = {
-    // 读取log数据
-    val log: DataFrame = spark.read
-      .format("txt")
-      .option("sep", "\u0001")
-      .option("header", "false")
-      .schema(MyConstants.logSchema)
-      .load(MyConstants.logPath)
-
+  def process(spark: SparkSession, log: DataFrame): Unit = {
     // 数据预处理
     // action操作转换为评分数值
-    val ratingLog: DataFrame = log.select("user_id", "item_id", "action")
+    val ratingLog: DataFrame = log.select("userId", "itemId", "action")
       .withColumn("rating", when(
         col("action") === "pay", 1.0).otherwise(0.5))
     // 评分数值聚合求和
-    val sumRatingLog: DataFrame = ratingLog.groupBy("user_id", "item_id")
+    val sumRatingLog: DataFrame = ratingLog.groupBy("userId", "itemId")
       .agg(sum("rating"))
       .alias("sumRating")
 
@@ -39,8 +30,8 @@ object CollaborativeFilter {
       .setRank(10) // 隐向量维度
       .setMaxIter(10) // 迭代次数
       .setRegParam(0.1) // 正则化
-      .setUserCol("user_id")
-      .setItemCol("item_id")
+      .setUserCol("userId")
+      .setItemCol("itemId")
       .setRatingCol("sumRating")
 
     // 训练模型

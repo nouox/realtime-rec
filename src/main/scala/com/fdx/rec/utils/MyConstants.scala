@@ -20,9 +20,8 @@ object MyConstants {
     .add("feedback", StringType, nullable = false)
     .add("gmtCreate", StringType, nullable = false)
 
-  val dataFolderPath: String = "hdfs://hadoop102:9000/..."
-  val logPath: String = dataFolderPath + "/log.csv"
-  val productPath: String = dataFolderPath + "/product.csv"
-  val reviewPath: String = dataFolderPath + "/review.csv"
-
+  val hdfsFolderPath: String = "hdfs://hadoop102:9000/..."
+  val logPath: String = hdfsFolderPath + "/log.csv"
+  val productPath: String = hdfsFolderPath + "/product.csv"
+  val reviewPath: String = hdfsFolderPath + "/review.csv"
 }
