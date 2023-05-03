@@ -13,30 +13,35 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  */
 object CollaborativeFilter {
   def process(spark: SparkSession): Unit = {
-    // 从hdfs读数据
+    // 读取log数据
     val log: DataFrame = spark.read
       .format("txt")
+      .option("sep", "\u0001")
       .option("header", "false")
       .schema(MyConstants.logSchema)
       .load(MyConstants.logPath)
 
     // 数据预处理
-    val logProcessed: DataFrame = log.select(
-      col("user_id"),
-      col("item_id"),
-      expr("action")
-    )
+    // action操作转换为评分数值
+    val ratingLog: DataFrame = log.select("user_id", "item_id", "action")
+      .withColumn("rating", when(
+        col("action") === "pay", 1.0).otherwise(0.5))
+    // 评分数值聚合求和
+    val sumRatingLog: DataFrame = ratingLog.groupBy("user_id", "item_id")
+      .agg(sum("rating"))
+      .alias("sumRating")
 
     // 划分数据集
-    val Array(trainingData, testData) = log.randomSplit(Array(0.8, 0.2))
+    val Array(trainingData, testData) = sumRatingLog.randomSplit(Array(0.8, 0.2))
 
     // 创建als模型
     val als: ALS = new ALS()
-      .setMaxIter(10)
-      .setRegParam(0.01)
-      .setUserCol("userId")
-      .setItemCol("itemId")
-      .setRatingCol("action")
+      .setRank(10) // 隐向量维度
+      .setMaxIter(10) // 迭代次数
+      .setRegParam(0.1) // 正则化
+      .setUserCol("user_id")
+      .setItemCol("item_id")
+      .setRatingCol("sumRating")
 
     // 训练模型
     val model: ALSModel = als.fit(trainingData)
@@ -47,8 +52,8 @@ object CollaborativeFilter {
     // 评估模型性能
     val evaluator: RegressionEvaluator = new RegressionEvaluator()
       .setMetricName("rmse")
-      .setLabelCol("action")
-      .setPredictionCol("predictioin")
+      .setLabelCol("sumRating")
+      .setPredictionCol("prediction")
     val rmse: Double = evaluator.evaluate(predictions)
   }
 }
