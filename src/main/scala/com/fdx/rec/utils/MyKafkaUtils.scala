@@ -32,7 +32,7 @@ object MyKafkaUtils {
   );
 
   /**
-   * 基于SparkStreaming消费 ,获取到KafkaDStream , 使用默认的offset
+   * 基于SparkStreaming消费 ,获取到KafkaDStream, 使用默认的offset
    */
   def getKafkaDStream(ssc: StreamingContext, topic: String, groupId: String): InputDStream[ConsumerRecord[String, String]] = {
     consumerConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)

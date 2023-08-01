@@ -11,7 +11,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * 最后使用协同过滤算法来推荐相似的商品
  */
 object CollaborativeFilter {
-  def process(spark: SparkSession, log: DataFrame): Unit = {
+  def process(spark: SparkSession, log: DataFrame): ALSModel = {
     // 数据预处理
     // action操作转换为评分数值
     val ratingLog: DataFrame = log.select("userId", "itemId", "action")
@@ -46,6 +46,9 @@ object CollaborativeFilter {
       .setLabelCol("sumRating")
       .setPredictionCol("prediction")
     val rmse: Double = evaluator.evaluate(predictions)
+
+    // 返回模型
+    model
   }
 }
 

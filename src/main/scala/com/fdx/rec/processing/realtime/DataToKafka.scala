@@ -1,4 +1,4 @@
-package com.fdx.rec.processing
+package com.fdx.rec.processing.realtime
 
 import com.fdx.rec.utils.MyConstants
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
@@ -7,7 +7,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import java.util.Properties
 
-object CsvToKafka {
+object DataToKafka {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
       .appName("CsvToKafka")
