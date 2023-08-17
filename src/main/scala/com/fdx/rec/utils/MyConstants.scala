@@ -4,9 +4,10 @@ import org.apache.spark.sql.types.{IntegerType, StringType, StructType}
 
 object MyConstants {
   val logSchema: StructType = new StructType()
-    .add("itemId", IntegerType, nullable = false)
+    .add("itemId", StringType, nullable = false)
     .add("userId", StringType, nullable = false)
     .add("action", StringType, nullable = false)
+    .add("vDate", StringType, nullable = false)
     .add("vTime", StringType, nullable = false)
   val productSchema: StructType = new StructType()
     .add("title", StringType, nullable = false)

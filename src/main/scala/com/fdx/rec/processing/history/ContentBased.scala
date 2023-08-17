@@ -13,19 +13,19 @@ object ContentBased {
   // 4. 推荐生成：根据用户历史行为和物品相似度计算，为用户推荐与其历史行为相关的相似物品。
   def process(spark: SparkSession, log: DataFrame, product: DataFrame): ALSModel = {
     // 分词和停用词过滤
-    val tokenizer: Tokenizer = new Tokenizer()
-      .setInputCol("title")
-      .setOutputCol("words")
-    val stopWordsRemover: StopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filtered")
-
-    val featurizedData: DataFrame = stopWordsRemover.transform(tokenizer.transform(product))
+    // val tokenizer: Tokenizer = new Tokenizer()
+    //   .setInputCol("title")
+    //   .setOutputCol("category")
+    // val stopWordsRemover: StopWordsRemover = new StopWordsRemover().setInputCol("category").setOutputCol("filtered")
+    // val featurizedData: DataFrame = stopWordsRemover.transform(tokenizer.transform(product))
 
     // 计算TF-IDF
     val hashingTF: HashingTF = new HashingTF()
-      .setInputCol("filtered")
+      .setInputCol("category")
       .setOutputCol("rawFeatures")
       .setNumFeatures(20)
-    val featurizedDataWithTF: DataFrame = hashingTF.transform(featurizedData)
+    val featurizedDataWithTF: DataFrame = hashingTF.transform(product)
+    featurizedDataWithTF.show()
 
     val idf: IDF = new IDF()
       .setInputCol("rawFeatures")
@@ -42,10 +42,10 @@ object ContentBased {
     val joinedDF: DataFrame = ratingLog.join(rescaledData, Seq("item_id"), "left")
 
     // 物品相似度计算
-    val documents = rescaledData.select("item_id", "features").rdd
-      .map { case row => (row.getAs[Int]("item_id"), row.getAs[Vector]("features")) }
-    val similarities = documents.cartesian(documents).map { case ((id1, v1), (id2, v2)) => (id1, id2, cosineSimilarity(v1, v2)) }.filter { case (id1, id2, sim) => id1 != id2 }
-    val similarityDF = similarities.toDF("item_id1", "item_id2", "similarity")
+    // val documents = rescaledData.select("item_id", "features").rdd
+    //   .map { case row => (row.getAs[Int]("item_id"), row.getAs[Vector](4,1,1)) }
+    // val similarities = documents.cartesian(documents).map { case ((id1, v1), (id2, v2)) => (id1, id2, cosineSimilarity(v1, v2)) }.filter { case (id1, id2, sim) => id1 != id2 }
+    // val similarityDF = similarities.toDF("item_id1", "item_id2", "similarity")
 
     // 构建als模型
     val als: ALS = new ALS()
