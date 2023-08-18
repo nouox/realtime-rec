@@ -21,7 +21,7 @@ object GenOfflineRecModel {
     val cfModel: ALSModel = CollaborativeFilter.process(spark, oriData._1)
 
     // 基于内容的推荐算法
-    val cbModel: ALSModel = ContentBased.process(spark, oriData._1, oriData._2)
+    val cbModel: ALSModel = ContentBased.process(oriData._1, oriData._2)
 
     // 深度学习模型
 

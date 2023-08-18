@@ -6,28 +6,29 @@ import org.apache.spark.sql.SparkSession
 import org.scalatest.flatspec.AnyFlatSpec
 
 
-class MyTest extends AnyFlatSpec{
-  val master = "local"
-  private val sc = SparkSession.builder().master(master).appName("test").getOrCreate()
+class MyTest extends AnyFlatSpec {
+  val master = "local[*]"
+  private val spark = SparkSession.builder().master(master).appName("test").getOrCreate()
 
   // 读取log.csv
-  private val logDF = sc.read.format("csv")
+  private val logDF = spark.read.format("csv")
     .option("sep", ",")
     .option("header", "false")
     .schema(MyConstants.logSchema)
     .load("src/main/resources/log1.csv")
 
   // 读取product.csv
-  private val prdDF = sc.read.format("csv")
+  private val prdDF = spark.read.format("csv")
     .option("sep", ",")
     .option("header", "false")
     .schema(MyConstants.productSchema)
     .load("src/main/resources/product1.csv")
 
-  ContentBased.process(sc, logDF, prdDF)
+  ContentBased.setSparkSession(spark)
+  ContentBased.process(logDF, prdDF)
 
-  if (sc != null) {
-    sc.stop()
+  if (spark != null) {
+    spark.stop()
   }
 
 }

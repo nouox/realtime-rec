@@ -87,7 +87,7 @@ object UpdateRealtimeRecModel {
       val spark: SparkSession = SparkSession.builder().config(rdd.sparkContext.getConf).getOrCreate()
       val df: DataFrame = spark.createDataFrame(rdd)
     })
-
+    
 
     // 将数据聚合处理为(userId, itemId, sumRating)格式
     val value: DStream[(String, String, Double)] = sumRatingDStream
